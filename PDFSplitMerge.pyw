@@ -2,14 +2,12 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.ttk import *
-from PyPDF2 import PdfReader, PdfWriter, PdfMerger
+from pypdf import PdfReader, PdfWriter, PdfMerger
 import os
 import subprocess
 import img2pdf
 from PIL import Image
 import sys
-
-
 
 iMaxStackSize = 5000
 sys.setrecursionlimit(iMaxStackSize)
@@ -32,7 +30,7 @@ def browse_split_destination_button():
     
 def splitToPDF():
  
-    #try:
+    try:
         #print(split_des_folder_path.get())
         inputpdf = PdfReader(open(split_folder_path.get(), "rb"),strict=False)
         i=0
@@ -45,11 +43,11 @@ def splitToPDF():
     
         messagebox.showinfo("Info","PDF File Splitted Successfully")
         subprocess.run(['explorer', os.path.realpath(split_des_folder_path.get())])
-    # except:
-    #   messagebox.showerror("Warning","Some Error Occured")
-    # finally:
-    #    split_folder_path.set("")
-    #    split_des_folder_path.set("")
+    except:
+      messagebox.showerror("Warning","Some Error Occured")
+    finally:
+       split_folder_path.set("")
+       split_des_folder_path.set("")
 
 
 def browse_merge_source_button():
@@ -206,7 +204,7 @@ def browse_extractPDF_destination_button():
     extractPDF_dest_folder_path.set(filename)
  
 def extractPageFromPDF():
-   # try:
+    try:
 
         #print(getPDFPageNumber(extractPDFPageNumber.get()))
         pageNumber = getPDFPageNumber(extractPDFPageNumber.get())
@@ -228,8 +226,8 @@ def extractPageFromPDF():
         extractPDF_dest_folder_path.set("")
         extractPDF_folder_path.set("")
         extractPDFPageNumber.set("")
-    # except:
-    #     messagebox.showerror("Warning","Some Error Occured")
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
         
 
 
@@ -289,9 +287,11 @@ def compressToPDF():
     inputpdf = PdfReader(open(compress_folder_path.get(), "rb"),strict=False)
  #   messagebox.showinfo(len(inputpdf.pages))
     output = PdfWriter()
-    for page in inputpdf.pages:
-        page.compress_content_streams()      
+    for page in inputpdf.pages:            
         output.add_page(page)
+
+    for page in output.pages:
+        page.compress_content_streams()
         
     with open(compress_des_folder_path.get(), "wb") as outputStream:
         output.write(outputStream)
@@ -299,24 +299,6 @@ def compressToPDF():
     messagebox.showinfo("Info","PDF File Compressed Successfully")
     subprocess.run(['explorer', os.path.realpath(compress_des_folder_path.get())])
         
-        # reader = PdfReader("example.pdf")
-        # writer = PdfWriter()
-
-        # for page in reader.pages:
-        #     page.compress_content_streams()  # This is CPU intensive!
-        #     writer.add_page(page)
-
-        # with open("out.pdf", "wb") as f:
-        #     writer.write(f)
-#    except:
-#        messagebox.showerror("Warning","Some Error Occured")
-#     finally:
-#        split_folder_path.set("")
-#        split_des_folder_path.set("")
-
-       
-
-
 
 #This section initiate Graphics and defines position and geometry of windows which opens
 root =Tk()
@@ -494,15 +476,6 @@ convertPDFButton = Button(tab5,text="  Compress PDF  ",command=compressToPDF)
 convertPDFButton.place(x=250,y=140,anchor="w")
 
 tabcontrol.pack(expand="6", fill="both")
-
-'''
-errorArea = LabelFrame(root, text=" Errors ", width=600, height=80)
-errorArea.grid(row=2, column=0, columnspan=2, sticky="E", \
-             padx=100, pady=0, ipadx=0, ipady=0)
-errorArea.place(x=50,y=250)
-errorMessage = Label(errorArea, text="hello")
-errorMessage.place(x=100, y=40, anchor="w")
-'''
 
 root.deiconify()
 root.mainloop()
