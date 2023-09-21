@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.ttk import *
-from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
+from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 import os
 import subprocess
 import img2pdf
@@ -16,46 +16,53 @@ sys.setrecursionlimit(iMaxStackSize)
 
 def browse_split_source_button():
     global split_folder_path
-    filename = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = \
-                                        (("pdf files","*.pdf"),("all files","*.*")))
+    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))    
+    last_opened_source_path.set(os.path.dirname(filename))
     split_folder_path.set(filename)
     #print(split_folder_path.get())
     #print(os.path.dirname(folder_path.get()))
 
 def browse_split_destination_button():
     global split_des_folder_path
-    filename=filedialog.askdirectory()
+    filename=filedialog.askdirectory(initialdir = last_opened_dest_path.get())
+    last_opened_dest_path.set(filename)   
     split_des_folder_path.set(filename)
     #print(split_des_folder_path.get())
     
 def splitToPDF():
+ 
     #try:
         #print(split_des_folder_path.get())
-        inputpdf = PdfFileReader(open(split_folder_path.get(), "rb"),strict=False)
-        for i in range(inputpdf.numPages):
-            output = PdfFileWriter()
-            output.addPage(inputpdf.getPage(i))
+        inputpdf = PdfReader(open(split_folder_path.get(), "rb"),strict=False)
+        i=0
+        for pages in inputpdf.pages:
+            output = PdfWriter()
+            output.add_page(pages)
+            i=i+1
             with open(split_des_folder_path.get() + "/pdfpage%02d.pdf" % i, "wb") as outputStream:
                 output.write(outputStream)
     
         messagebox.showinfo("Info","PDF File Splitted Successfully")
         subprocess.run(['explorer', os.path.realpath(split_des_folder_path.get())])
-    #except:
+    # except:
     #   messagebox.showerror("Warning","Some Error Occured")
-    #finally:
+    # finally:
     #    split_folder_path.set("")
     #    split_des_folder_path.set("")
 
 
 def browse_merge_source_button():
     global merge_folder_path
-    filename = filedialog.askdirectory()  # askdirectory()
+    filename = filedialog.askdirectory(initialdir = last_opened_source_path.get())  # askdirectory()
+    last_opened_source_path.set(filename)
     merge_folder_path.set(filename)
 
 def browse_merge_destination_button():
     global merge_des_folder_path
-    filename=filedialog.asksaveasfilename(initialdir = "/",title = "Save file",defaultextension="*.pdf",filetypes = \
+    filename=filedialog.asksaveasfilename(initialdir = last_opened_dest_path.get(),title = "Save file",defaultextension="*.pdf",filetypes = \
                                         (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_dest_path.set(os.path.dirname(filename))
     merge_des_folder_path.set(filename)
     #messagebox.showinfo("file name", merge_des_folder_path.get())
 
@@ -63,7 +70,7 @@ def browse_merge_destination_button():
 def mergeToPDF():
     try:
         x = [os.path.abspath(os.path.join(merge_folder_path.get(), a)) for a in os.listdir(merge_folder_path.get()) if a.endswith(".pdf")]
-        merger = PdfFileMerger()
+        merger = PdfMerger()
 
         for pdf in x:
             fread = open(pdf, 'rb')
@@ -87,21 +94,24 @@ def mergeToPDF():
 def browse_img2pdf_source_button():
     global img2pdf_folder_path
     if(rvalue.get()==1):
-        filename = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = \
-                                        (("jpg files","*.jpg"),("all files","*.*")))
+        filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
+                    (("jpg files","*.jpg"),("all files","*.*")))        
+        last_opened_source_path.set(os.path.dirname(filename))
     else:
-        filename = filedialog.askdirectory()  # askdirectory()
+        filename = filedialog.askdirectory(initialdir = last_opened_source_path.get())  # askdirectory()
+        last_opened_source_path.set(filename)
     img2pdf_folder_path.set(filename)
-
 
 
 def browse_img2pdf_destination_button():
     global img2pdf_dest_folder_path
     if(rvalue.get() == 2):
-        filename = filedialog.askdirectory()  # askdirectory()
+        filename = filedialog.askdirectory(initialdir = last_opened_dest_path.get())  # askdirectory()
+        last_opened_dest_path.set(filename)
     elif(rvalue.get() == 3 or rvalue.get() == 1):
-        filename = filedialog.asksaveasfilename(initialdir = "/",title = "Save file",defaultextension="*.pdf",filetypes = \
+        filename = filedialog.asksaveasfilename(initialdir = last_opened_dest_path.get(),title = "Save file",defaultextension="*.pdf",filetypes = \
                     (("pdf files","*.pdf"),("all files","*.*")))
+        last_opened_dest_path.set(os.path.dirname(filename))
     img2pdf_dest_folder_path.set(filename)
 
 
@@ -116,7 +126,8 @@ def imageToPDF():
         messagebox.showerror("Warning","Kindly Select the Proper Options")   
 
     img2pdf_folder_path.set("") 
-    img2pdf_dest_folder_path.set("") 
+    img2pdf_dest_folder_path.set("")
+
 
 def imageToPDFSingle():
     img_path = img2pdf_folder_path.get()
@@ -137,8 +148,7 @@ def imageToPDFSeparate():
 
     for img_path in x:
         new_path=os.path.abspath(os.path.join(img2pdf_dest_folder_path.get(), os.path.basename(img_path)))
-        image = Image.open(img_path)
-        
+        image = Image.open(img_path)        
         pdf_path=new_path.rsplit('.', 1)[0] + '.pdf'
         pdf_bytes=img2pdf.convert(image.filename)
         with open(pdf_path,"wb") as file:
@@ -151,7 +161,7 @@ def imageToPDFSeparate():
 def imageToPDFAllMerge():
     filelist=[]
     x = [os.path.abspath(os.path.join(img2pdf_folder_path.get(), a)) for a in os.listdir(img2pdf_folder_path.get()) if a.endswith(".jpg")]
-    merger = PdfFileMerger()
+    merger = PdfMerger()
     
     for img_path in x:
             #new_path=os.path.abspath(os.path.join(img2pdf_dest_folder_path.get(), os.path.basename(img_path)))
@@ -178,33 +188,36 @@ def imageToPDFAllMerge():
     #for f in filelist:
     #    os.remove(f)
     messagebox.showinfo("info","Image File Converted and Merged Successfully") 
-    subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
-    
+    subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])    
 
 def browse_extractPDF_source_button():
     global extractPDF_folder_path
-    filename = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = \
+    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
                                         (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_source_path.set(os.path.dirname(filename))
     extractPDF_folder_path.set(filename)
 
 def browse_extractPDF_destination_button():
     global extractPDF_dest_folder_path
-    filename=filedialog.asksaveasfilename(initialdir = "/",title = "Save file",defaultextension="*.pdf",filetypes = \
+    filename=filedialog.asksaveasfilename(initialdir = last_opened_dest_path.get(),title = "Save file",defaultextension="*.pdf",filetypes = \
                                         (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_dest_path.set(os.path.dirname(filename))
     #filename=filedialog.askdirectory()
     extractPDF_dest_folder_path.set(filename)
  
 def extractPageFromPDF():
-    try:
+   # try:
 
         #print(getPDFPageNumber(extractPDFPageNumber.get()))
         pageNumber = getPDFPageNumber(extractPDFPageNumber.get())
-        output = PdfFileWriter()
-        inputpdf = PdfFileReader(open(extractPDF_folder_path.get(), "rb"),strict=False)
+        output = PdfWriter()
+        inputpdf = PdfReader(open(extractPDF_folder_path.get(), "rb"),strict=False)
         
-        for i in range(inputpdf.numPages):
-            if(i+1 in pageNumber):
-                output.addPage(inputpdf.getPage(i))
+        i=0
+        for page in inputpdf.pages:
+            if((i+1) in pageNumber):
+                output.add_page(page)
+            i = i + 1
 
         with open(extractPDF_dest_folder_path.get(),"wb") as outputStream:
             output.write(outputStream)
@@ -215,8 +228,8 @@ def extractPageFromPDF():
         extractPDF_dest_folder_path.set("")
         extractPDF_folder_path.set("")
         extractPDFPageNumber.set("")
-    except:
-        messagebox.showerror("Warning","Some Error Occured")
+    # except:
+    #     messagebox.showerror("Warning","Some Error Occured")
         
 
 
@@ -252,6 +265,56 @@ def getPDFPageNumber(pageNumberString):
 
     except:
         messagebox.showerror("Warning","Some Error in Page Number Section")
+    
+
+def browse_compress_source_button():
+    global split_folder_path
+    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_source_path.set(os.path.dirname(filename))
+    compress_folder_path.set(filename)
+    #print(split_folder_path.get())
+    #print(os.path.dirname(folder_path.get()))
+
+def browse_compress_destination_button():
+    global compress_des_folder_path
+    filename=filedialog.asksaveasfilename(initialdir = last_opened_dest_path.get(),title = "Save file",defaultextension="*.pdf",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_dest_path.set(os.path.dirname(filename))
+    compress_des_folder_path.set(filename)
+    
+def compressToPDF():
+  #  try:
+        #print(split_des_folder_path.get())
+    inputpdf = PdfReader(open(compress_folder_path.get(), "rb"),strict=False)
+ #   messagebox.showinfo(len(inputpdf.pages))
+    output = PdfWriter()
+    for page in inputpdf.pages:
+        page.compress_content_streams()      
+        output.add_page(page)
+        
+    with open(compress_des_folder_path.get(), "wb") as outputStream:
+        output.write(outputStream)
+    
+    messagebox.showinfo("Info","PDF File Compressed Successfully")
+    subprocess.run(['explorer', os.path.realpath(compress_des_folder_path.get())])
+        
+        # reader = PdfReader("example.pdf")
+        # writer = PdfWriter()
+
+        # for page in reader.pages:
+        #     page.compress_content_streams()  # This is CPU intensive!
+        #     writer.add_page(page)
+
+        # with open("out.pdf", "wb") as f:
+        #     writer.write(f)
+#    except:
+#        messagebox.showerror("Warning","Some Error Occured")
+#     finally:
+#        split_folder_path.set("")
+#        split_des_folder_path.set("")
+
+       
 
 
 
@@ -277,6 +340,12 @@ tabcontrol.add(tab1,text="  PDF Splitter  ")
 # This section for Tab1 PDF Splitter ***************************************************
 split_folder_path = StringVar()
 split_des_folder_path=StringVar()
+last_opened_source_path = StringVar()
+last_opened_dest_path = StringVar()
+
+desktop = os.path.expanduser("~/Desktop")
+last_opened_source_path.set(desktop)
+last_opened_dest_path.set(desktop)
 
 pdfSplit = LabelFrame(tab1, text=" Split Single PDF to Multiple Files ", width=585, height=100)
 pdfSplit.place(x=10,y=20)
@@ -399,7 +468,32 @@ extractPDFButton = Button(tab4,text="  Extract Page From PDF File  ",command=ext
 extractPDFButton.place(x=210,y=140,anchor="w")
 #****************************************************************************************
 
-tabcontrol.pack(expand="5", fill="both")
+
+tab5 = Frame(tabcontrol)
+tabcontrol.add(tab5,text="  Compress PDF Page  ")
+compress_folder_path = StringVar()
+compress_des_folder_path=StringVar()
+
+pdfCompress = LabelFrame(tab5, text=" Compress File ", width=585, height=100)
+pdfCompress.place(x=10,y=20)
+compressSourceLabel = Label(pdfCompress, text="Source")
+compressSourceLabel.place(x=5, y=20, anchor="w")
+compressSourceEntry = Entry(pdfCompress,width=70,textvariable=compress_folder_path)
+compressSourceEntry.place(x=70,y=20,anchor="w")
+compressSourceButton=Button(pdfCompress,text="Browse",command=browse_compress_source_button)
+compressSourceButton.place(x=500,y=20,anchor="w")
+
+compressDestinationLabel = Label(pdfCompress, text="Destination")
+compressDestinationLabel.place(x=5, y=50, anchor="w")
+compressDestinationEntry = Entry(pdfCompress,width=70,textvariable=compress_des_folder_path)
+compressDestinationEntry.place(x=70,y=50,anchor="w")
+compressDestinationButton=Button(pdfCompress,text="Browse",command=browse_compress_destination_button)
+compressDestinationButton.place(x=500,y=50,anchor="w")
+
+convertPDFButton = Button(tab5,text="  Compress PDF  ",command=compressToPDF)
+convertPDFButton.place(x=250,y=140,anchor="w")
+
+tabcontrol.pack(expand="6", fill="both")
 
 '''
 errorArea = LabelFrame(root, text=" Errors ", width=600, height=80)
