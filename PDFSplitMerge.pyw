@@ -280,24 +280,41 @@ def browse_compress_destination_button():
                                         (("pdf files","*.pdf"),("all files","*.*")))
     last_opened_dest_path.set(os.path.dirname(filename))
     compress_des_folder_path.set(filename)
+
+
+def compressPDFQualityOnOff():
+    if checkButtonValue.get():
+        compressPageQualityEntry.config(state= "disabled")   
+        compress_PDF_Quality.set(0)     
+    else:     
+        compressPageQualityEntry.config(state= "enabled")
+
     
 def compressToPDF():
-  #  try:
-        #print(split_des_folder_path.get())
-    inputpdf = PdfReader(open(compress_folder_path.get(), "rb"),strict=False)
- #   messagebox.showinfo(len(inputpdf.pages))
-    output = PdfWriter()
-    for page in inputpdf.pages:            
-        output.add_page(page)
+    try:
+        inputpdf = PdfReader(open(compress_folder_path.get(), "rb"),strict=False)
+        output = PdfWriter()
+        for page in inputpdf.pages:            
+            output.add_page(page)
 
-    for page in output.pages:
-        page.compress_content_streams()
+        if checkButtonValue.get():
+            for page in output.pages:
+                page.compress_content_streams()      
+        else:   
+            for page in output.pages:
+                for img in page.images:
+                    img.replace(img.image, quality=compress_PDF_Quality.get())        
+            
+        with open(compress_des_folder_path.get(), "wb") as outputStream:
+            output.write(outputStream)
         
-    with open(compress_des_folder_path.get(), "wb") as outputStream:
-        output.write(outputStream)
-    
-    messagebox.showinfo("Info","PDF File Compressed Successfully")
-    subprocess.run(['explorer', os.path.realpath(compress_des_folder_path.get())])
+        messagebox.showinfo("Info","PDF File Compressed Successfully")
+        subprocess.run(['explorer', os.path.realpath(compress_des_folder_path.get())])
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:    
+        compress_folder_path.set("")
+        compress_des_folder_path.set("")
         
 
 #This section initiate Graphics and defines position and geometry of windows which opens
@@ -455,22 +472,32 @@ tab5 = Frame(tabcontrol)
 tabcontrol.add(tab5,text="  Compress PDF Page  ")
 compress_folder_path = StringVar()
 compress_des_folder_path=StringVar()
+compress_PDF_Quality = IntVar()
 
-pdfCompress = LabelFrame(tab5, text=" Compress File ", width=585, height=100)
-pdfCompress.place(x=10,y=20)
+
+pdfCompress = LabelFrame(tab5, text=" Compress File ", width=585, height=110)
+pdfCompress.place(x=10,y=10)
+
+checkButtonValue = IntVar()
+checkButtonValue.set(1)
+compressChkPageQualityOnOFF = Checkbutton(pdfCompress,text="Page Quality",variable=checkButtonValue,onvalue=0,offvalue=1,  command=compressPDFQualityOnOff)
+compressChkPageQualityOnOFF.place(x=70, y=10, anchor="w")
+compressPageQualityEntry = Entry(pdfCompress,width=15,state="disabled",textvariable=compress_PDF_Quality)
+compressPageQualityEntry.place(x=165,y=10,anchor="w")
+
 compressSourceLabel = Label(pdfCompress, text="Source")
-compressSourceLabel.place(x=5, y=20, anchor="w")
+compressSourceLabel.place(x=5, y=40, anchor="w")
 compressSourceEntry = Entry(pdfCompress,width=70,textvariable=compress_folder_path)
-compressSourceEntry.place(x=70,y=20,anchor="w")
+compressSourceEntry.place(x=70,y=40,anchor="w")
 compressSourceButton=Button(pdfCompress,text="Browse",command=browse_compress_source_button)
-compressSourceButton.place(x=500,y=20,anchor="w")
+compressSourceButton.place(x=500,y=40,anchor="w")
 
 compressDestinationLabel = Label(pdfCompress, text="Destination")
-compressDestinationLabel.place(x=5, y=50, anchor="w")
+compressDestinationLabel.place(x=5, y=70, anchor="w")
 compressDestinationEntry = Entry(pdfCompress,width=70,textvariable=compress_des_folder_path)
-compressDestinationEntry.place(x=70,y=50,anchor="w")
+compressDestinationEntry.place(x=70,y=70,anchor="w")
 compressDestinationButton=Button(pdfCompress,text="Browse",command=browse_compress_destination_button)
-compressDestinationButton.place(x=500,y=50,anchor="w")
+compressDestinationButton.place(x=500,y=70,anchor="w")
 
 convertPDFButton = Button(tab5,text="  Compress PDF  ",command=compressToPDF)
 convertPDFButton.place(x=250,y=140,anchor="w")
