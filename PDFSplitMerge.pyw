@@ -56,11 +56,14 @@ def browse_merge_sourcefolder_button():
     merge_folder_path.set(filename)
 
 def browse_merge_source_button():
-    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),multiple="true", title = "Select file",filetypes = \
+    filename = filedialog.askopenfilenames(initialdir = last_opened_source_path.get(), title = "Select file",filetypes = \
                                         (("pdf files","*.pdf"),("all files","*.*")))
     last_opened_source_path.set(filename)
     merge_folder_path.set(filename)
 
+    for fname in filename:
+        multiple_file_names.append(fname)    
+  
 def browse_merge_destination_button():
     global merge_des_folder_path
     filename=filedialog.asksaveasfilename(initialdir = last_opened_dest_path.get(),title = "Save file",defaultextension="*.pdf",filetypes = \
@@ -83,7 +86,7 @@ def mergePDFByFolder():
         for pdf in x:
             fread = open(pdf, 'rb')
             merger.append(fread)
-           
+    
 
         with open(merge_des_folder_path.get(), "wb") as fout:
             merger.write(fout)
@@ -100,7 +103,25 @@ def mergePDFByFolder():
         merge_des_folder_path.set("")
 
 def mergePDFByMultipleFiles():
-    messagebox.showinfo("","")
+    try:       
+        merger = PdfMerger()
+        for pdf in multiple_file_names:            
+            fread = open(pdf, 'rb')
+            merger.append(fread)
+    
+        with open(merge_des_folder_path.get(), "wb") as fout:
+            merger.write(fout)
+            fout.close()
+            fread.close()
+
+        messagebox.showinfo("Info","PDF File Merged Successfully")
+        subprocess.run(['explorer', os.path.realpath(merge_des_folder_path.get())])
+
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:    
+        merge_folder_path.set("")
+        merge_des_folder_path.set("")      
        
 def mergeToPDF():
     if mvalue.get() == 1:
@@ -367,7 +388,7 @@ def insDelPDFFiles():
         insertPDFFiles()
 
     insDel_src_folder_path.set("") 
-    img2pdf_dest_folder_path.set("")
+    insDel_des_folder_path.set("")
     insDel_page_folder_path.set("")           
 
 def insertPDFFiles():
@@ -382,7 +403,8 @@ def deletePDFFiles():
 root =Tk()
 root.title("Welcome to PDF Splitter/Merger                        Developed By: Deepak Kumar Ram")
 #root.iconbitmap(r"C:\Users\Deepak\Desktop\Installer\sbi.ico")
-        #root.overrideredirect(1)
+# #root.overrideredirect(1)
+
 root.resizable(0,0)  
 root.withdraw()
 root.update_idletasks()
@@ -469,6 +491,8 @@ rvalue=IntVar()
 img2pdf_dest_folder_path=StringVar()
 img2pdf_folder_path=StringVar()
 rvalue.set(1)
+multiple_file_names=[]
+
 imagePDFMergeConvert = LabelFrame(tab3, text=" Convert Image Files to PDF Files ", width=585, height=110)
 imagePDFMergeConvert.place(x=10,y=10)
 
@@ -505,7 +529,6 @@ extractPDF_dest_folder_path=StringVar()
 extractPDF_folder_path=StringVar()
 extractPDFPageNumber =StringVar()
 
-
 extractPDFConvert = LabelFrame(tab4, text=" Extract Page from PDF File ", width=585, height=110)
 extractPDFConvert.place(x=10,y=10)
 
@@ -515,7 +538,6 @@ extractPDFPageNoEntry = Entry(extractPDFConvert,width=15,textvariable=extractPDF
 extractPDFPageNoEntry.place(x=75,y=10,anchor="w")
 extractPDFPageNoDetailsLabel = Label(extractPDFConvert, text="Hint:For Single Page Enter 3 or 4 or 1,3 or 4,5,7 For Range 4-8 or 2,4,6-9,11-15")
 extractPDFPageNoDetailsLabel.place(x=175, y=10, anchor="w")
-
 
 extractPDFSourceLabel = Label(extractPDFConvert, text="Source")
 extractPDFSourceLabel.place(x=5, y=40, anchor="w")
@@ -535,13 +557,11 @@ extractPDFButton = Button(tab4,text="  Extract Page From PDF File  ",command=ext
 extractPDFButton.place(x=210,y=140,anchor="w")
 #****************************************************************************************
 
-
 tab5 = Frame(tabcontrol)
 tabcontrol.add(tab5,text=" Compress PDF Page ")
 compress_folder_path = StringVar()
 compress_des_folder_path=StringVar()
 compress_PDF_Quality = IntVar()
-
 
 pdfCompress = LabelFrame(tab5, text=" Compress File ", width=585, height=110)
 pdfCompress.place(x=10,y=10)
@@ -588,13 +608,10 @@ insDelLabel.place(x=5, y=14, anchor="w")
 insDelLabelPageNoEntry = Entry(pdfInsertDelete,width=8,textvariable=extractPDFPageNumber)
 insDelLabelPageNoEntry.place(x=70,y=14,anchor="w")
 
-
-
 deleteRadio = Radiobutton(pdfInsertDelete,text="Delete Page", variable=idvalue, value=1,command=radioInsDelPDFFiles)
 deleteRadio.place(x=130, y=14, anchor=W)
 insertRadio =Radiobutton(pdfInsertDelete, text = "Insert Page", variable=idvalue, value=2,command=radioInsDelPDFFiles)
 insertRadio.place(x=215, y=14, anchor=W)
-
 
 insDelInsPageLabel = Label(pdfInsertDelete, text="Inserted Page", state="disabled")
 insDelInsPageLabel.place(x=310, y=14, anchor="w")
