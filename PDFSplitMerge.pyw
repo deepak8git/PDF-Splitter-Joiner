@@ -49,10 +49,15 @@ def splitToPDF():
        split_folder_path.set("")
        split_des_folder_path.set("")
 
-
-def browse_merge_source_button():
+def browse_merge_sourcefolder_button():
     global merge_folder_path
     filename = filedialog.askdirectory(initialdir = last_opened_source_path.get())  # askdirectory()
+    last_opened_source_path.set(filename)
+    merge_folder_path.set(filename)
+
+def browse_merge_source_button():
+    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),multiple="true", title = "Select file",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))
     last_opened_source_path.set(filename)
     merge_folder_path.set(filename)
 
@@ -64,8 +69,13 @@ def browse_merge_destination_button():
     merge_des_folder_path.set(filename)
     #messagebox.showinfo("file name", merge_des_folder_path.get())
 
+def radioMergePDF():
+    if mvalue.get() == 1:
+        browse_merge_sourcefolder_button()
+    elif mvalue.get() == 2:
+        browse_merge_source_button()
 
-def mergeToPDF():
+def mergePDFByFolder():
     try:
         x = [os.path.abspath(os.path.join(merge_folder_path.get(), a)) for a in os.listdir(merge_folder_path.get()) if a.endswith(".pdf")]
         merger = PdfMerger()
@@ -73,6 +83,7 @@ def mergeToPDF():
         for pdf in x:
             fread = open(pdf, 'rb')
             merger.append(fread)
+           
 
         with open(merge_des_folder_path.get(), "wb") as fout:
             merger.write(fout)
@@ -88,6 +99,14 @@ def mergeToPDF():
         merge_folder_path.set("")
         merge_des_folder_path.set("")
 
+def mergePDFByMultipleFiles():
+    messagebox.showinfo("","")
+       
+def mergeToPDF():
+    if mvalue.get() == 1:
+        mergePDFByFolder()
+    elif mvalue.get() == 2:
+        mergePDFByMultipleFiles()     
 
 def browse_img2pdf_source_button():
     global img2pdf_folder_path
@@ -100,7 +119,6 @@ def browse_img2pdf_source_button():
         last_opened_source_path.set(filename)
     img2pdf_folder_path.set(filename)
 
-
 def browse_img2pdf_destination_button():
     global img2pdf_dest_folder_path
     if(rvalue.get() == 2):
@@ -111,7 +129,6 @@ def browse_img2pdf_destination_button():
                     (("pdf files","*.pdf"),("all files","*.*")))
         last_opened_dest_path.set(os.path.dirname(filename))
     img2pdf_dest_folder_path.set(filename)
-
 
 def imageToPDF():
     if(rvalue.get() == 1):
@@ -126,7 +143,6 @@ def imageToPDF():
     img2pdf_folder_path.set("") 
     img2pdf_dest_folder_path.set("")
 
-
 def imageToPDFSingle():
     img_path = img2pdf_folder_path.get()
     new_path=img2pdf_dest_folder_path.get()
@@ -139,7 +155,6 @@ def imageToPDFSingle():
     image.close()
     messagebox.showinfo("info","Successfully Converted Image File to PDF File") 
     subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
-
 
 def imageToPDFSeparate():
     x = [os.path.abspath(os.path.join(img2pdf_folder_path.get(), a)) for a in os.listdir(img2pdf_folder_path.get()) if a.endswith(".jpg")]
@@ -154,7 +169,6 @@ def imageToPDFSeparate():
         image.close()
     messagebox.showinfo("info","Successfully Converted Image File to PDF File") 
     subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
-
 
 def imageToPDFAllMerge():
     filelist=[]
@@ -229,8 +243,6 @@ def extractPageFromPDF():
     except:
         messagebox.showerror("Warning","Some Error Occured")
         
-
-
 def getPDFPageNumber(pageNumberString):
     try:
         inputStr = pageNumberString #extractPDFPageNumber.get()
@@ -263,10 +275,9 @@ def getPDFPageNumber(pageNumberString):
 
     except:
         messagebox.showerror("Warning","Some Error in Page Number Section")
-    
-
+  
 def browse_compress_source_button():
-    global split_folder_path
+    global compress_folder_path
     filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
                                         (("pdf files","*.pdf"),("all files","*.*")))
     last_opened_source_path.set(os.path.dirname(filename))
@@ -281,14 +292,12 @@ def browse_compress_destination_button():
     last_opened_dest_path.set(os.path.dirname(filename))
     compress_des_folder_path.set(filename)
 
-
 def compressPDFQualityOnOff():
     if checkButtonValue.get():
         compressPageQualityEntry.config(state= "disabled")   
         compress_PDF_Quality.set(0)     
     else:     
         compressPageQualityEntry.config(state= "enabled")
-
     
 def compressToPDF():
     try:
@@ -316,16 +325,58 @@ def compressToPDF():
         compress_folder_path.set("")
         compress_des_folder_path.set("")
 
-
 def browse_insdel_source_button():
-    messagebox.showinfo("","Source")
+    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_source_path.set(os.path.dirname(filename))
+    insDel_src_folder_path.set(filename)
     
-def browse_insdel_destination_button():
-    messagebox.showinfo("","destination")
+def browse_insdel_destination_button():    
+    filename=filedialog.asksaveasfilename(initialdir = last_opened_dest_path.get(),title = "Save file",defaultextension="*.pdf",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_dest_path.set(os.path.dirname(filename))
+    insDel_des_folder_path.set(filename)
 
+def browse_insdel_inspage_button():
+    filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
+                                        (("pdf files","*.pdf"),("all files","*.*")))
+    last_opened_source_path.set(os.path.dirname(filename))
+    insDel_page_folder_path.set(filename)
+
+def radioInsDelPDFFiles():
+    if(idvalue.get() == 1):
+        insDelInsPageLabel.config(state= "disabled")  
+        insDelInsPageEntry.config(state= "disabled")  
+        insDelInsertSourceButton.config(state= "disabled")  
+
+        insDelLabel.config(state= "enabled")  
+        insDelLabelPageNoEntry.config(state= "enabled")     
+
+    elif(idvalue.get() == 2):
+        insDelInsPageLabel.config(state= "enabled")  
+        insDelInsPageEntry.config(state= "enabled")  
+        insDelInsertSourceButton.config(state= "enabled") 
+
+        insDelLabel.config(state= "disabled")  
+        insDelLabelPageNoEntry.config(state= "disabled")       
+    
 def insDelPDFFiles():
-    messagebox.showinfo("","insert delete")
-        
+    if(idvalue.get() == 1):
+        deletePDFFiles()    
+    elif(idvalue.get() == 2):     
+        insertPDFFiles()
+
+    insDel_src_folder_path.set("") 
+    img2pdf_dest_folder_path.set("")
+    insDel_page_folder_path.set("")           
+
+def insertPDFFiles():
+    messagebox.showinfo("","insert")
+
+def deletePDFFiles():
+    messagebox.showinfo("","detele")
+
+
 
 #This section initiate Graphics and defines position and geometry of windows which opens
 root =Tk()
@@ -383,7 +434,7 @@ tabcontrol.add(tab2,text=" PDF Merger ")
 merge_folder_path = StringVar()
 merge_des_folder_path=StringVar()
 mvalue = IntVar()
-
+mvalue.set(1)
 pdfMerge = LabelFrame(tab2, text=" Merger Multiple PDF Files to Single File ", width=585, height=110)
 pdfMerge.place(x=10,y=10)
 
@@ -396,7 +447,7 @@ mergeSourceLabel = Label(pdfMerge, text="Source")
 mergeSourceLabel.place(x=5, y=40, anchor="w")
 mergeSourceEntry = Entry(pdfMerge,width=70,textvariable=merge_folder_path)
 mergeSourceEntry.place(x=70,y=40,anchor="w")
-mergeSourceButton=Button(pdfMerge,text="Browse",command=browse_merge_source_button)
+mergeSourceButton=Button(pdfMerge,text="Browse",command=radioMergePDF)
 mergeSourceButton.place(x=500,y=40,anchor="w")
 
 mergeDestinationLabel = Label(pdfMerge, text="Destination")
@@ -417,7 +468,7 @@ tabcontrol.add(tab3,text=" Image to PDF ")
 rvalue=IntVar()
 img2pdf_dest_folder_path=StringVar()
 img2pdf_folder_path=StringVar()
-
+rvalue.set(1)
 imagePDFMergeConvert = LabelFrame(tab3, text=" Convert Image Files to PDF Files ", width=585, height=110)
 imagePDFMergeConvert.place(x=10,y=10)
 
@@ -522,34 +573,46 @@ convertPDFButton.place(x=250,y=140,anchor="w")
 
 tab6 = Frame(tabcontrol)
 tabcontrol.add(tab6,text=" Insert/Delete Page ")
-insDel_folder_path = StringVar()
+insDel_src_folder_path = StringVar()
 insDel_des_folder_path=StringVar()
-insDel_PDF_Quality = IntVar()
+insDel_page_folder_path = StringVar()
+insDel_PDF_No = IntVar()
+idvalue =IntVar()
+idvalue.set(1)
 
 pdfInsertDelete = LabelFrame(tab6, text=" Insert/Delete Page From File ", width=585, height=110)
 pdfInsertDelete.place(x=10,y=10) 
 
-
 insDelLabel = Label(pdfInsertDelete, text="Page No")
 insDelLabel.place(x=5, y=14, anchor="w")
-insDelLabelPageNoEntry = Entry(pdfInsertDelete,width=15,textvariable=extractPDFPageNumber)
+insDelLabelPageNoEntry = Entry(pdfInsertDelete,width=8,textvariable=extractPDFPageNumber)
 insDelLabelPageNoEntry.place(x=70,y=14,anchor="w")
 
-insertRadio =Radiobutton(pdfInsertDelete, text = "Insert PDF Page", variable=rvalue, value=1)
-insertRadio.place(x=190, y=14, anchor=W)
-deleteRadio = Radiobutton(pdfInsertDelete,text="Delete PDF Page", variable=rvalue, value=2)
-deleteRadio.place(x=300, y=14, anchor=W)
+
+
+deleteRadio = Radiobutton(pdfInsertDelete,text="Delete Page", variable=idvalue, value=1,command=radioInsDelPDFFiles)
+deleteRadio.place(x=130, y=14, anchor=W)
+insertRadio =Radiobutton(pdfInsertDelete, text = "Insert Page", variable=idvalue, value=2,command=radioInsDelPDFFiles)
+insertRadio.place(x=215, y=14, anchor=W)
+
+
+insDelInsPageLabel = Label(pdfInsertDelete, text="Inserted Page", state="disabled")
+insDelInsPageLabel.place(x=310, y=14, anchor="w")
+insDelInsPageEntry = Entry(pdfInsertDelete,width=16,textvariable=insDel_page_folder_path, state="disabled")
+insDelInsPageEntry.place(x=390,y=14,anchor="w")
+insDelInsertSourceButton=Button(pdfInsertDelete,text="Browse", state="disabled", command=browse_insdel_inspage_button)
+insDelInsertSourceButton.place(x=500,y=14,anchor="w")
 
 insDelSourceLabel = Label(pdfInsertDelete, text="Source")
-insDelSourceLabel.place(x=5, y=40, anchor="w")
-insDelSourceEntry = Entry(pdfInsertDelete,width=70,textvariable=compress_folder_path)
-insDelSourceEntry.place(x=70,y=40,anchor="w")
+insDelSourceLabel.place(x=5, y=42, anchor="w")
+insDelSourceEntry = Entry(pdfInsertDelete,width=70,textvariable=insDel_src_folder_path)
+insDelSourceEntry.place(x=70,y=42,anchor="w")
 insDelSourceButton=Button(pdfInsertDelete,text="Browse",command=browse_insdel_source_button)
-insDelSourceButton.place(x=500,y=40,anchor="w")
+insDelSourceButton.place(x=500,y=42,anchor="w")
 
 insDelDestinationLabel = Label(pdfInsertDelete, text="Destination")
 insDelDestinationLabel.place(x=5, y=70, anchor="w")
-insDelDestinationEntry = Entry(pdfInsertDelete,width=70,textvariable=compress_des_folder_path)
+insDelDestinationEntry = Entry(pdfInsertDelete,width=70,textvariable=insDel_des_folder_path)
 insDelDestinationEntry.place(x=70,y=70,anchor="w")
 insDelDestinationButton=Button(pdfInsertDelete,text="Browse",command=browse_insdel_destination_button)
 insDelDestinationButton.place(x=500,y=70,anchor="w")
