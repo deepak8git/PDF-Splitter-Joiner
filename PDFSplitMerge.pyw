@@ -315,6 +315,16 @@ def compressToPDF():
     finally:    
         compress_folder_path.set("")
         compress_des_folder_path.set("")
+
+
+def browse_insdel_source_button():
+    messagebox.showinfo("","Source")
+    
+def browse_insdel_destination_button():
+    messagebox.showinfo("","destination")
+
+def insDelPDFFiles():
+    messagebox.showinfo("","insert delete")
         
 
 #This section initiate Graphics and defines position and geometry of windows which opens
@@ -334,7 +344,7 @@ root.geometry("{}x{}+{}+{}".format(w,h,int(x),int(y)))
 
 tabcontrol = Notebook(root)
 tab1 = Frame(tabcontrol)
-tabcontrol.add(tab1,text="  PDF Splitter  ")
+tabcontrol.add(tab1,text=" PDF Splitter ")
 
 # This section for Tab1 PDF Splitter ***************************************************
 split_folder_path = StringVar()
@@ -367,34 +377,41 @@ convertPDFButton.place(x=250,y=140,anchor="w")
 #****************************************************************************************
 
 tab2 = Frame(tabcontrol)
-tabcontrol.add(tab2,text="  PDF Merger  ")
+tabcontrol.add(tab2,text=" PDF Merger ")
 
 # This section for Tab2 PDF Merger ***************************************************
 merge_folder_path = StringVar()
 merge_des_folder_path=StringVar()
+mvalue = IntVar()
 
-pdfMerge = LabelFrame(tab2, text=" Merger Multiple PDF Files to Single File ", width=585, height=100)
-pdfMerge.place(x=10,y=20)
+pdfMerge = LabelFrame(tab2, text=" Merger Multiple PDF Files to Single File ", width=585, height=110)
+pdfMerge.place(x=10,y=10)
+
+mergeByFolderRadio =Radiobutton(pdfMerge, text = "Merge By Folder", variable=mvalue, value=1)
+mergeByFolderRadio.place(x=70, y=14, anchor=W)
+mergeByMultipleFileRadio = Radiobutton(pdfMerge,text="Merge By Multiple Files", variable=mvalue, value=2)
+mergeByMultipleFileRadio.place(x=187, y=14, anchor=W)
+
 mergeSourceLabel = Label(pdfMerge, text="Source")
-mergeSourceLabel.place(x=5, y=20, anchor="w")
+mergeSourceLabel.place(x=5, y=40, anchor="w")
 mergeSourceEntry = Entry(pdfMerge,width=70,textvariable=merge_folder_path)
-mergeSourceEntry.place(x=70,y=20,anchor="w")
+mergeSourceEntry.place(x=70,y=40,anchor="w")
 mergeSourceButton=Button(pdfMerge,text="Browse",command=browse_merge_source_button)
-mergeSourceButton.place(x=500,y=20,anchor="w")
+mergeSourceButton.place(x=500,y=40,anchor="w")
 
 mergeDestinationLabel = Label(pdfMerge, text="Destination")
-mergeDestinationLabel.place(x=5, y=50, anchor="w")
+mergeDestinationLabel.place(x=5, y=70, anchor="w")
 mergeDestinationEntry = Entry(pdfMerge,width=70,textvariable=merge_des_folder_path)
-mergeDestinationEntry.place(x=70,y=50,anchor="w")
+mergeDestinationEntry.place(x=70,y=70,anchor="w")
 mergeDestinationButton=Button(pdfMerge,text="Browse",command=browse_merge_destination_button)
-mergeDestinationButton.place(x=500,y=50,anchor="w")
+mergeDestinationButton.place(x=500,y=70,anchor="w")
 
 mergePDFButton = Button(tab2,text="  Merge PDF Files  ",command=mergeToPDF)
 mergePDFButton.place(x=250,y=140,anchor="w")
 #****************************************************************************************
 
 tab3 = Frame(tabcontrol)
-tabcontrol.add(tab3,text="  Image to PDF  ")
+tabcontrol.add(tab3,text=" Image to PDF ")
 
 #This Section is for Tab3 Image to PDF *****************************************************
 rvalue=IntVar()
@@ -405,11 +422,11 @@ imagePDFMergeConvert = LabelFrame(tab3, text=" Convert Image Files to PDF Files 
 imagePDFMergeConvert.place(x=10,y=10)
 
 imageSingleToPDFRadio =Radiobutton(imagePDFMergeConvert, text = "Single File to PDF", variable=rvalue, value=1)
-imageSingleToPDFRadio.place(x=70, y=10, anchor=W)
+imageSingleToPDFRadio.place(x=70, y=14, anchor=W)
 imageToPDFRadio = Radiobutton(imagePDFMergeConvert,text="All Image to Seperate PDF", variable=rvalue, value=2)
-imageToPDFRadio.place(x=187, y=10, anchor=W)
+imageToPDFRadio.place(x=187, y=14, anchor=W)
 imageToPDFMergeRadio = Radiobutton(imagePDFMergeConvert,text="All Image to PDF and Merge", variable=rvalue, value=3)
-imageToPDFMergeRadio.place(x=350, y=10, anchor=W)
+imageToPDFMergeRadio.place(x=350, y=14, anchor=W)
 
 imageToPDFSourceLabel = Label(imagePDFMergeConvert, text="Source")
 imageToPDFSourceLabel.place(x=5, y=40, anchor="w")
@@ -430,7 +447,7 @@ convertImageToPDFButton.place(x=210,y=140,anchor="w")
 #****************************************************************************************
 
 tab4 = Frame(tabcontrol)
-tabcontrol.add(tab4,text="  Extract PDF Page  ")
+tabcontrol.add(tab4,text=" Extract PDF Page ")
 
 #This Section is for Tab4 For Extracting PDF Files Based on Page Number *****************************************************
 extractPDF_dest_folder_path=StringVar()
@@ -469,7 +486,7 @@ extractPDFButton.place(x=210,y=140,anchor="w")
 
 
 tab5 = Frame(tabcontrol)
-tabcontrol.add(tab5,text="  Compress PDF Page  ")
+tabcontrol.add(tab5,text=" Compress PDF Page ")
 compress_folder_path = StringVar()
 compress_des_folder_path=StringVar()
 compress_PDF_Quality = IntVar()
@@ -501,8 +518,46 @@ compressDestinationButton.place(x=500,y=70,anchor="w")
 
 convertPDFButton = Button(tab5,text="  Compress PDF  ",command=compressToPDF)
 convertPDFButton.place(x=250,y=140,anchor="w")
+#****************************************************************************************
 
-tabcontrol.pack(expand="6", fill="both")
+tab6 = Frame(tabcontrol)
+tabcontrol.add(tab6,text=" Insert/Delete Page ")
+insDel_folder_path = StringVar()
+insDel_des_folder_path=StringVar()
+insDel_PDF_Quality = IntVar()
+
+pdfInsertDelete = LabelFrame(tab6, text=" Insert/Delete Page From File ", width=585, height=110)
+pdfInsertDelete.place(x=10,y=10) 
+
+
+insDelLabel = Label(pdfInsertDelete, text="Page No")
+insDelLabel.place(x=5, y=14, anchor="w")
+insDelLabelPageNoEntry = Entry(pdfInsertDelete,width=15,textvariable=extractPDFPageNumber)
+insDelLabelPageNoEntry.place(x=70,y=14,anchor="w")
+
+insertRadio =Radiobutton(pdfInsertDelete, text = "Insert PDF Page", variable=rvalue, value=1)
+insertRadio.place(x=190, y=14, anchor=W)
+deleteRadio = Radiobutton(pdfInsertDelete,text="Delete PDF Page", variable=rvalue, value=2)
+deleteRadio.place(x=300, y=14, anchor=W)
+
+insDelSourceLabel = Label(pdfInsertDelete, text="Source")
+insDelSourceLabel.place(x=5, y=40, anchor="w")
+insDelSourceEntry = Entry(pdfInsertDelete,width=70,textvariable=compress_folder_path)
+insDelSourceEntry.place(x=70,y=40,anchor="w")
+insDelSourceButton=Button(pdfInsertDelete,text="Browse",command=browse_insdel_source_button)
+insDelSourceButton.place(x=500,y=40,anchor="w")
+
+insDelDestinationLabel = Label(pdfInsertDelete, text="Destination")
+insDelDestinationLabel.place(x=5, y=70, anchor="w")
+insDelDestinationEntry = Entry(pdfInsertDelete,width=70,textvariable=compress_des_folder_path)
+insDelDestinationEntry.place(x=70,y=70,anchor="w")
+insDelDestinationButton=Button(pdfInsertDelete,text="Browse",command=browse_insdel_destination_button)
+insDelDestinationButton.place(x=500,y=70,anchor="w")
+
+insDelPDFButton = Button(tab6,text="  Insert / Delete Page  ",command=insDelPDFFiles)
+insDelPDFButton.place(x=250,y=140,anchor="w")
+
+tabcontrol.pack(expand="7", fill="both")
 
 root.deiconify()
 root.mainloop()
