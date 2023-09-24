@@ -121,7 +121,8 @@ def mergePDFByMultipleFiles():
         messagebox.showerror("Warning","Some Error Occured")
     finally:    
         merge_folder_path.set("")
-        merge_des_folder_path.set("")      
+        merge_des_folder_path.set("") 
+        multiple_file_names.clear()     
        
 def mergeToPDF():
     if mvalue.get() == 1:
@@ -369,17 +370,10 @@ def radioInsDelPDFFiles():
         insDelInsPageLabel.config(state= "disabled")  
         insDelInsPageEntry.config(state= "disabled")  
         insDelInsertSourceButton.config(state= "disabled")  
-
-        insDelLabel.config(state= "enabled")  
-        insDelLabelPageNoEntry.config(state= "enabled")     
-
     elif(idvalue.get() == 2):
         insDelInsPageLabel.config(state= "enabled")  
         insDelInsPageEntry.config(state= "enabled")  
         insDelInsertSourceButton.config(state= "enabled") 
-
-        insDelLabel.config(state= "disabled")  
-        insDelLabelPageNoEntry.config(state= "disabled")       
     
 def insDelPDFFiles():
     if(idvalue.get() == 1):
@@ -396,7 +390,6 @@ def insertPDFFiles():
 
 def deletePDFFiles():
     messagebox.showinfo("","detele")
-
 
 
 #This section initiate Graphics and defines position and geometry of windows which opens
