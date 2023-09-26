@@ -259,11 +259,13 @@ def extractPageFromPDF():
         messagebox.showinfo("Info","PDF File Extracted Successfully")
         subprocess.run(['explorer', os.path.realpath(extractPDF_dest_folder_path.get())])
 
+
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
         extractPDF_dest_folder_path.set("")
         extractPDF_folder_path.set("")
         extractPDFPageNumber.set("")
-    except:
-        messagebox.showerror("Warning","Some Error Occured")
         
 def getPDFPageNumber(pageNumberString):
     try:
@@ -386,10 +388,66 @@ def insDelPDFFiles():
     insDel_page_folder_path.set("")           
 
 def insertPDFFiles():
-    messagebox.showinfo("","insert")
+    try:
+        pageNumber = getPDFPageNumber(insDelPDFPageNumber.get())        
+        output = PdfWriter()
+        inputpdf = PdfReader(open(insDel_src_folder_path.get(), "rb"),strict=False)
+        pagesrc = PdfReader(open(insDel_page_folder_path.get(), "rb"),strict=False)
+        i=1
+        for page in inputpdf.pages:
+            if(i in pageNumber):
+                for p in pagesrc.pages:
+                    output.add_page(p)
+                i = i + 1                
+            else:
+                output.add_page(page)
+                i = i + 1
+           
+
+        with open(insDel_des_folder_path.get(),"wb") as outputStream:
+            output.write(outputStream)
+        
+        messagebox.showinfo("Info","Page Deleted Successfully")
+        subprocess.run(['explorer', os.path.realpath(insDel_des_folder_path.get())])
+
+        
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
+        insDel_src_folder_path.set("")
+        insDel_page_folder_path.set("")
+        insDel_des_folder_path.set("")
+        insDelPDFPageNumber.set("")
+        pageNumber=0
 
 def deletePDFFiles():
-    messagebox.showinfo("","detele")
+    try:
+        pageNumber = getPDFPageNumber(insDelPDFPageNumber.get())        
+        output = PdfWriter()
+        inputpdf = PdfReader(open(insDel_src_folder_path.get(), "rb"),strict=False)
+        #insDel_page_folder_path
+        i=1
+        for page in inputpdf.pages:
+            if(i in pageNumber):
+                i = i + 1
+                continue
+            else:
+                i = i + 1
+                output.add_page(page)           
+
+        with open(insDel_des_folder_path.get(),"wb") as outputStream:
+            output.write(outputStream)
+        
+        messagebox.showinfo("Info","Page Deleted Successfully")
+        subprocess.run(['explorer', os.path.realpath(insDel_des_folder_path.get())])
+            
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
+        insDel_src_folder_path.set("")
+        insDel_des_folder_path.set("")
+        insDelPDFPageNumber.set("")
+        pageNumber=0
 
 
 #This section initiate Graphics and defines position and geometry of windows which opens
@@ -589,7 +647,8 @@ tabcontrol.add(tab6,text=" Insert/Delete Page ")
 insDel_src_folder_path = StringVar()
 insDel_des_folder_path=StringVar()
 insDel_page_folder_path = StringVar()
-insDel_PDF_No = IntVar()
+insDelPDFPageNumber = StringVar()
+
 idvalue =IntVar()
 idvalue.set(1)
 
@@ -598,7 +657,7 @@ pdfInsertDelete.place(x=10,y=10)
 
 insDelLabel = Label(pdfInsertDelete, text="Page No")
 insDelLabel.place(x=5, y=14, anchor="w")
-insDelLabelPageNoEntry = Entry(pdfInsertDelete,width=8,textvariable=extractPDFPageNumber)
+insDelLabelPageNoEntry = Entry(pdfInsertDelete,width=8,textvariable=insDelPDFPageNumber)
 insDelLabelPageNoEntry.place(x=70,y=14,anchor="w")
 
 deleteRadio = Radiobutton(pdfInsertDelete,text="Delete Page", variable=idvalue, value=1,command=radioInsDelPDFFiles)
