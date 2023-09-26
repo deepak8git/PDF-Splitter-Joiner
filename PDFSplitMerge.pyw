@@ -9,7 +9,7 @@ import img2pdf
 from PIL import Image
 import sys
 
-iMaxStackSize = 5000
+iMaxStackSize = 1500
 sys.setrecursionlimit(iMaxStackSize)
 
 def browse_split_source_button():
@@ -48,6 +48,8 @@ def splitToPDF():
     finally:
        split_folder_path.set("")
        split_des_folder_path.set("")
+       output.close()
+       outputStream.close()
 
 def browse_merge_sourcefolder_button():
     global merge_folder_path
@@ -85,13 +87,10 @@ def mergePDFByFolder():
 
         for pdf in x:
             fread = open(pdf, 'rb')
-            merger.append(fread)
-    
+            merger.append(fread)    
 
         with open(merge_des_folder_path.get(), "wb") as fout:
             merger.write(fout)
-            fout.close()
-            fread.close()
 
         messagebox.showinfo("Info","PDF File Merged Successfully")
         subprocess.run(['explorer', os.path.realpath(merge_des_folder_path.get())])
@@ -101,6 +100,8 @@ def mergePDFByFolder():
     finally:    
         merge_folder_path.set("")
         merge_des_folder_path.set("")
+        fout.close()
+        fread.close()
 
 def mergePDFByMultipleFiles():
     try:       
@@ -111,8 +112,6 @@ def mergePDFByMultipleFiles():
     
         with open(merge_des_folder_path.get(), "wb") as fout:
             merger.write(fout)
-            fout.close()
-            fread.close()
 
         messagebox.showinfo("Info","PDF File Merged Successfully")
         subprocess.run(['explorer', os.path.realpath(merge_des_folder_path.get())])
@@ -123,6 +122,8 @@ def mergePDFByMultipleFiles():
         merge_folder_path.set("")
         merge_des_folder_path.set("") 
         multiple_file_names.clear()     
+        fout.close()
+        fread.close()
        
 def mergeToPDF():
     if mvalue.get() == 1:
@@ -153,76 +154,101 @@ def browse_img2pdf_destination_button():
     img2pdf_dest_folder_path.set(filename)
 
 def imageToPDF():
-    if(rvalue.get() == 1):
-        imageToPDFSingle()
-    elif(rvalue.get() == 2):
-        imageToPDFSeparate()
-    elif(rvalue.get()==3):
-        imageToPDFAllMerge()
-    else:
-        messagebox.showerror("Warning","Kindly Select the Proper Options")   
-
-    img2pdf_folder_path.set("") 
-    img2pdf_dest_folder_path.set("")
+    try:
+        if(rvalue.get() == 1):
+            imageToPDFSingle()
+        elif(rvalue.get() == 2):
+            imageToPDFSeparate()
+        elif(rvalue.get()==3):
+            imageToPDFAllMerge()
+        else:
+            messagebox.showerror("Warning","Kindly Select the Proper Options")   
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
+        img2pdf_folder_path.set("") 
+        img2pdf_dest_folder_path.set("")      
 
 def imageToPDFSingle():
-    img_path = img2pdf_folder_path.get()
-    new_path=img2pdf_dest_folder_path.get()
-    #print(new_path)
-    image = Image.open(img_path)
-    pdf_path=new_path.rsplit('.', 1)[0] + '.pdf'
-    pdf_bytes=img2pdf.convert(image.filename)
-    with open(pdf_path,"wb") as file:
-        file.write(pdf_bytes)
-    image.close()
-    messagebox.showinfo("info","Successfully Converted Image File to PDF File") 
-    subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
-
-def imageToPDFSeparate():
-    x = [os.path.abspath(os.path.join(img2pdf_folder_path.get(), a)) for a in os.listdir(img2pdf_folder_path.get()) if a.endswith(".jpg")]
-
-    for img_path in x:
-        new_path=os.path.abspath(os.path.join(img2pdf_dest_folder_path.get(), os.path.basename(img_path)))
-        image = Image.open(img_path)        
+    
+    try:
+        img_path = img2pdf_folder_path.get()
+        new_path=img2pdf_dest_folder_path.get()
+        #print(new_path)
+        image = Image.open(img_path)
         pdf_path=new_path.rsplit('.', 1)[0] + '.pdf'
         pdf_bytes=img2pdf.convert(image.filename)
         with open(pdf_path,"wb") as file:
             file.write(pdf_bytes)
         image.close()
-    messagebox.showinfo("info","Successfully Converted Image File to PDF File") 
-    subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
+        messagebox.showinfo("info","Successfully Converted Image File to PDF File") 
+        subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
+        img2pdf_folder_path.set("") 
+        img2pdf_dest_folder_path.set("")  
+        file.close()
+
+def imageToPDFSeparate():
+    try:
+        x = [os.path.abspath(os.path.join(img2pdf_folder_path.get(), a)) for a in os.listdir(img2pdf_folder_path.get()) if a.endswith(".jpg")]
+
+        for img_path in x:
+            new_path=os.path.abspath(os.path.join(img2pdf_dest_folder_path.get(), os.path.basename(img_path)))
+            image = Image.open(img_path)        
+            pdf_path=new_path.rsplit('.', 1)[0] + '.pdf'
+            pdf_bytes=img2pdf.convert(image.filename)
+            with open(pdf_path,"wb") as file:
+                file.write(pdf_bytes)
+            image.close()
+        messagebox.showinfo("info","Successfully Converted Image File to PDF File") 
+        subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
+        img2pdf_folder_path.set("")
+        img2pdf_dest_folder_path.set("")
+        file.close()
 
 def imageToPDFAllMerge():
-    filelist=[]
-    x = [os.path.abspath(os.path.join(img2pdf_folder_path.get(), a)) for a in os.listdir(img2pdf_folder_path.get()) if a.endswith(".jpg")]
-    merger = PdfMerger()
-    
-    for img_path in x:
-            #new_path=os.path.abspath(os.path.join(img2pdf_dest_folder_path.get(), os.path.basename(img_path)))
-        pdf_path=img_path.rsplit('.', 1)[0] + '.pdf'
-
-        with Image.open(img_path) as img:
-            pdf_bytes=img2pdf.convert(img.filename)
-            filelist.append(pdf_path)  
-               
-        with open(pdf_path,"wb") as file:
-            file.write(pdf_bytes)
-            file.close()
-          
-        f=open(pdf_path, 'rb')
-        merger.append(f)
+    try:
+        filelist=[]
+        x = [os.path.abspath(os.path.join(img2pdf_folder_path.get(), a)) for a in os.listdir(img2pdf_folder_path.get()) if a.endswith(".jpg")]
+        merger = PdfMerger()
         
-        #merger.append(open(pdf_path, 'rb'))            
+        for img_path in x:
+                #new_path=os.path.abspath(os.path.join(img2pdf_dest_folder_path.get(), os.path.basename(img_path)))
+            pdf_path=img_path.rsplit('.', 1)[0] + '.pdf'
+
+            with Image.open(img_path) as img:
+                pdf_bytes=img2pdf.convert(img.filename)
+                filelist.append(pdf_path)  
+                
+            with open(pdf_path,"wb") as file:
+                file.write(pdf_bytes)
+                file.close()
+            
+            f=open(pdf_path, 'rb')
+            merger.append(f)
+            
+            #merger.append(open(pdf_path, 'rb'))            
+            
+        with open(img2pdf_dest_folder_path.get(), "wb") as fout:
+            merger.write(fout)
            
-    with open(img2pdf_dest_folder_path.get(), "wb") as fout:
-        merger.write(fout)
+
+        #for f in filelist:
+        #    os.remove(f)
+        messagebox.showinfo("info","Image File Converted and Merged Successfully") 
+        subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])    
+    except:
+        messagebox.showerror("Warning","Some Error Occured")
+    finally:
+        img2pdf_folder_path.set("")
+        img2pdf_dest_folder_path.set("")
         fout.close()
         f.close()
-
-    #for f in filelist:
-    #    os.remove(f)
-    messagebox.showinfo("info","Image File Converted and Merged Successfully") 
-    subprocess.run(['explorer', os.path.realpath(img2pdf_dest_folder_path.get())])    
 
 def browse_extractPDF_source_button():
     global extractPDF_folder_path
@@ -266,6 +292,7 @@ def extractPageFromPDF():
         extractPDF_dest_folder_path.set("")
         extractPDF_folder_path.set("")
         extractPDFPageNumber.set("")
+        outputStream.close()
         
 def getPDFPageNumber(pageNumberString):
     try:
@@ -348,6 +375,8 @@ def compressToPDF():
     finally:    
         compress_folder_path.set("")
         compress_des_folder_path.set("")
+        output.close()
+        outputStream.close()
 
 def browse_insdel_source_button():
     filename = filedialog.askopenfilename(initialdir = last_opened_source_path.get(),title = "Select file",filetypes = \
@@ -403,7 +432,6 @@ def insertPDFFiles():
                 output.add_page(page)
                 i = i + 1
            
-
         with open(insDel_des_folder_path.get(),"wb") as outputStream:
             output.write(outputStream)
         
@@ -419,7 +447,8 @@ def insertPDFFiles():
         insDel_des_folder_path.set("")
         insDelPDFPageNumber.set("")
         pageNumber=0
-
+        output.close()
+        
 def deletePDFFiles():
     try:
         pageNumber = getPDFPageNumber(insDelPDFPageNumber.get())        
@@ -447,6 +476,7 @@ def deletePDFFiles():
         insDel_src_folder_path.set("")
         insDel_des_folder_path.set("")
         insDelPDFPageNumber.set("")
+        output.close()
         pageNumber=0
 
 
